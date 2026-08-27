@@ -16,6 +16,9 @@ app/build/
 app/release/
 app/debug/
 
+# IDE project files
+project-*/
+
 # OS
 .DS_Store
 Thumbs.db
