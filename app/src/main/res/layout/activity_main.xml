@@ -53,7 +53,7 @@
 
     </LinearLayout>
 
-    <!-- ══ 主内容区（水平滚动，适配窄屏手机） ════════════ -->
+    <!-- ══ 主内容区（双向滚动，适配手机窄屏/矮屏） ══════ -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -61,17 +61,22 @@
         android:fillViewport="true"
         android:scrollbars="none">
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="@dimen/content_padding">
+            android:fillViewport="true"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/content_padding">
 
             <!-- ══ 第一行 ════════════════════════════════════ -->
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <!-- ─── 卡片1：当前状态 ───────────────────── -->
@@ -322,8 +327,7 @@
             <!-- ══ 第二行 ════════════════════════════════════ -->
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <!-- ─── 卡片4：连接模式 ───────────────────── -->
@@ -664,6 +668,8 @@
             </LinearLayout>
 
         </LinearLayout>
+
+        </ScrollView>
 
     </HorizontalScrollView>
 
