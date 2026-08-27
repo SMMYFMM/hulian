@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ══ 背景 ══════════════════════════════════════════ -->
+    <color name="bg_primary">#1A1A2E</color>
+    <color name="bg_card">#16213E</color>
+    <color name="bg_card_highlight">#0F3460</color>
+    <color name="bg_input">#0D0D1A</color>
+
+    <!-- ══ 主色调 ═════════════════════════════════════════ -->
+    <color name="color_primary">#7B61FF</color>
+    <color name="color_primary_dark">#0D0D1A</color>
+    <color name="color_accent">#7B61FF</color>
+    <color name="color_primary_alpha">#CC7B61FF</color>
+
+    <!-- ══ 状态颜色 ═══════════════════════════════════════ -->
+    <color name="state_idle">#7B61FF</color>
+    <color name="state_active">#4FC3F7</color>
+    <color name="state_success">#66BB6A</color>
+    <color name="state_timeout">#EF5350</color>
+    <color name="state_connected">#66BB6A</color>
+
+    <!-- 半透明版（悬浮窗圆圈用）-->
+    <color name="float_idle">#CC7B61FF</color>
+    <color name="float_active">#CC4FC3F7</color>
+    <color name="float_success">#CC66BB6A</color>
+    <color name="float_timeout">#CCEF5350</color>
+
+    <!-- ══ 文字 ═══════════════════════════════════════════ -->
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="text_hint">#606060</color>
+    <color name="text_accent">#7B61FF</color>
+    <color name="text_warning">#EF5350</color>
+    <color name="text_success">#66BB6A</color>
+
+    <!-- ══ 分割线/边框 ═════════════════════════════════════ -->
+    <color name="divider">#2A2A4A</color>
+    <color name="border">#2A2A4A</color>
+
+    <!-- ══ 开关控件 ═══════════════════════════════════════ -->
+    <color name="switch_on">#7B61FF</color>
+    <color name="switch_off">#404060</color>
+    <color name="switch_thumb">#FFFFFF</color>
+
+    <!-- ══ 按钮 ═══════════════════════════════════════════ -->
+    <color name="btn_primary">#7B61FF</color>
+    <color name="btn_primary_pressed">#5A45CC</color>
+    <color name="btn_secondary">#2A2A4A</color>
+    <color name="btn_danger">#EF5350</color>
+
+    <!-- ══ 状态栏 ══════════════════════════════════════════ -->
+    <color name="status_bar">#1A1A2E</color>
+
+    <!-- ══ 透明 ═══════════════════════════════════════════ -->
+    <color name="transparent">#00000000</color>
+    <color name="scrim">#80000000</color>
+    <!-- 模板图标需要此颜色，不可删除 -->
+    <color name="ic_launcher_background">#1A1A2E</color>
+
+</resources>

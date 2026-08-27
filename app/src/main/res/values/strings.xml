@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ══ 基本 ══════════════════════════════════════════ -->
+    <string name="app_name">猫猫互联助手1044783222群</string>
+
+    <!-- ══ 通知 ══════════════════════════════════════════ -->
+    <string name="notif_channel_name">&#20114;&#32852;&#26381;&#21153;</string>
+    <string name="notif_channel_desc">&#20445;&#25345;&#20114;&#32852;&#26381;&#21153;&#22312;&#21518;&#21488;&#36816;&#34892;</string>
+    <string name="notif_title">&#20114;&#32852;&#21161;&#25163;</string>
+    <string name="notif_text">&#26381;&#21153;&#36816;&#34892;&#20013;</string>
+
+    <!-- ══ 连接状态 ═════════════════════════════════════ -->
+    <string name="state_idle">&#31354;&#38386;</string>
+    <string name="state_initiating">&#21021;&#22987;&#21270;&#20013;</string>
+    <string name="state_waiting">&#31561;&#24453;&#28909;&#28857;</string>
+    <string name="state_timeout">&#24050;&#36229;&#26102;</string>
+    <string name="state_launching">&#21551;&#21160;&#20013;</string>
+    <string name="state_connected">&#20114;&#32852;&#20013;</string>
+
+    <!-- ══ 运行模式 ═════════════════════════════════════ -->
+    <string name="mode_manual">&#25163;&#21160;&#27169;&#24335;</string>
+    <string name="mode_auto">&#33258;&#21160;&#27169;&#24335;</string>
+    <string name="mode_wifi">WiFi模式</string>
+    <string name="mode_hotspot">热点模式</string>
+
+    <!-- ══ 主界面区块标题 ══════════════════════════════ -->
+    <string name="section_status">&#24403;&#21069;&#29366;&#24577;</string>
+    <string name="section_app">&#20114;&#32852; App</string>
+    <string name="section_hotspot">&#28909;&#28857;&#35774;&#32622;</string>
+    <string name="section_connect_mode">连接模式</string>
+    <string name="section_auto">&#33258;&#21160;&#27169;&#24335;</string>
+    <string name="section_float">&#24748;&#28014;&#31383;</string>
+    <string name="section_advanced">&#39640;&#32423;</string>
+
+    <!-- ══ 设置项标签 ══════════════════════════════════ -->
+    <string name="label_select_app">&#36873;&#25321;&#20114;&#32852; App</string>
+    <string name="label_ssid">&#30446;&#26631;&#28909;&#28857; SSID</string>
+    <string name="label_auto_mode">&#33258;&#21160;&#27169;&#24335;</string>
+    <string name="label_boot_delay">&#24320;&#26426;&#24310;&#36831;&#65288;&#31186;&#65289;</string>
+    <string name="label_hotspot_timeout">&#28909;&#28857;&#31561;&#24453;&#36229;&#26102;&#65288;&#31186;&#65289;</string>
+    <string name="label_float_enabled">&#26174;&#31034;&#24748;&#28014;&#31383;</string>
+    <string name="label_float_size">&#24748;&#28014;&#31383;&#22823;&#23567;</string>
+    <string name="label_bt_command">&#34013;&#29273;&#20851;&#38381;&#21629;&#20196;</string>
+    <string name="label_boot_start">&#24320;&#26426;&#33258;&#21551;</string>
+    <string name="label_connect_mode">连接模式</string>
+
+    <!-- ══ 设置项说明 ══════════════════════════════════ -->
+    <string name="desc_boot_delay">&#24320;&#26426;&#21518;&#24310;&#36831;&#35813;&#31186;&#25968;&#33258;&#21160;&#24320;&#22987;&#20114;&#32852;&#27969;&#31243;</string>
+    <string name="desc_hotspot_timeout">&#36229;&#36807;&#35813;&#26102;&#38388;&#26410;&#36830;&#19978;&#28909;&#28857;&#21017;&#26174;&#31034;&#36229;&#26102;</string>
+    <string name="desc_bt_command">&#25163;&#21160;&#27169;&#24335;&#32467;&#26463;&#26102;&#25191;&#34892;&#30340; Shell &#21629;&#20196;</string>
+    <string name="desc_ssid">&#36873;&#25321;&#24050;&#20445;&#23384;&#25110;&#25163;&#21160;&#36755;&#20837;</string>
+    <string name="desc_connect_mode">WiFi模式：车机连接手机热点；热点模式：车机开启热点供手机连接</string>
+
+    <!-- ══ 按钮 ═════════════════════════════════════════ -->
+    <string name="btn_ok">&#30830;&#35748;</string>
+    <string name="btn_cancel">&#21462;&#28040;</string>
+    <string name="btn_grant">&#21435;&#25480;&#26435;</string>
+    <string name="btn_retry">&#37325;&#35797;</string>
+    <string name="btn_agree">&#21516;&#24847;</string>
+    <string name="btn_disagree">&#19981;&#21516;&#24847;</string>
+    <string name="btn_view_disclaimer">&#26597;&#30475;&#22768;&#26126;</string>
+
+    <!-- ══ 提示信息 ═════════════════════════════════════ -->
+    <string name="msg_no_app">&#26410;&#26816;&#27979;&#21040;&#20114;&#32852; App</string>
+    <string name="msg_not_configured">&#35831;&#20808;&#35774;&#32622;&#20114;&#32852; App &#21644;&#30446;&#26631; SSID</string>
+    <string name="msg_two_apps">&#26816;&#27979;&#21040;&#20004;&#20010; App&#65292;&#35831;&#36873;&#25321;&#19968;&#20010;</string>
+    <string name="msg_ssid_hint">&#35831;&#36755;&#20837;&#25110;&#36873;&#25321; SSID</string>
+    <string name="msg_tip_longpress">&#38271;&#25353;&#24748;&#28014;&#31383;&#21487;&#36827;&#34892; BT &#22797;&#20301;&#37325;&#35797;</string>
+    <string name="msg_app_exited">&#20114;&#32852; App &#24050;&#36864;&#20986;&#65292;&#21487;&#25163;&#21160;&#37325;&#35797;</string>
+    <string name="msg_auto_timeout">&#33258;&#21160;&#27169;&#24335;&#36229;&#26102;&#65292;&#21487;&#25163;&#21160;&#37325;&#35797;</string>
+
+    <!-- ══ 权限 ═════════════════════════════════════════ -->
+    <string name="perm_overlay_title">&#24748;&#28014;&#31383;&#26435;&#38480;</string>
+    <string name="perm_overlay_msg">&#35831;&#25480;&#20104;&#24748;&#28014;&#31383;&#26435;&#38480;&#20197;&#27491;&#24120;&#26174;&#31034;</string>
+    <string name="perm_location_title">&#20301;&#32622;&#26435;&#38480;</string>
+    <string name="perm_location_msg">Android 9 &#35835;&#21462; WiFi SSID &#38656;&#35201;&#20301;&#32622;&#26435;&#38480;</string>
+
+    <!-- ══ 免责声明 ═════════════════════════════════════ -->
+    <string name="disclaimer_title">&#20351;&#29992;&#22768;&#26126;</string>
+    <string name="disclaimer_content">&#26412;&#36719;&#20214;&#20026;&#20491;&#20154;&#24037;&#20855;&#65292;&#20316;&#32773;&#19981;&#25215;&#25285;&#20351;&#29992;&#24341;&#36215;&#30340;&#20219;&#20309;&#25439;&#22833;&#12290;&#20351;&#29992;&#21363;&#35270;&#20316;&#21516;&#24847;&#12290;猫猫</string>
+
+    <!-- ══ App名称备用（AppLauncher检测不到label时使用）══ -->
+    <string name="app_label_yilian">&#20159;&#36830;&#25163;&#26426;&#20114;&#32852;</string>
+    <string name="app_label_baidu">&#30334;&#24230; CarLife</string>
+
+</resources>

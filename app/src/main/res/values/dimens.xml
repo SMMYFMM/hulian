@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ══ 顶栏 ══════════════════════════════════════════ -->
+    <dimen name="topbar_height">56dp</dimen>
+    <dimen name="topbar_padding_h">24dp</dimen>
+    <dimen name="topbar_title_size">20sp</dimen>
+    <dimen name="topbar_state_size">17sp</dimen>
+    <dimen name="topbar_mode_size">15sp</dimen>
+
+    <!-- ══ 主内容区 ══════════════════════════════════════ -->
+    <dimen name="content_padding">8dp</dimen>
+    <dimen name="card_margin">5dp</dimen>
+    <dimen name="card_padding">16dp</dimen>
+    <dimen name="card_width_normal">250dp</dimen>
+    <dimen name="card_width_wide">270dp</dimen>
+    <dimen name="row_gap">8dp</dimen>
+
+    <!-- ══ 文字大小 ══════════════════════════════════════ -->
+    <dimen name="text_section_title">13sp</dimen>
+    <dimen name="text_label">17sp</dimen>
+    <dimen name="text_hint">12sp</dimen>
+    <dimen name="text_state_big">30sp</dimen>
+    <dimen name="text_button">14sp</dimen>
+    <dimen name="text_input">15sp</dimen>
+
+    <!-- ══ 控件尺寸 ══════════════════════════════════════ -->
+    <dimen name="input_height">48dp</dimen>
+    <dimen name="row_height">52dp</dimen>
+    <dimen name="button_height">44dp</dimen>
+    <dimen name="status_dot_size">14dp</dimen>
+    <dimen name="divider_height">1dp</dimen>
+    <dimen name="section_divider_margin_top">6dp</dimen>
+    <dimen name="section_divider_margin_bottom">12dp</dimen>
+
+    <!-- ══ 输入框 ════════════════════════════════════════ -->
+    <dimen name="input_padding_h">10dp</dimen>
+    <dimen name="input_width_small">80dp</dimen>
+
+    <!-- ══ 条目间距 ══════════════════════════════════════ -->
+    <dimen name="item_margin_top">4dp</dimen>
+    <dimen name="desc_margin_bottom">2dp</dimen>
+
+    <!-- ══ 开关控件缩放 ══════════════════════════════════ -->
+    <item name="switch_scale" format="float" type="dimen">1.25</item>
+    <item name="radio_scale" format="float" type="dimen">1.35</item>
+
+    <!-- ══ 悬浮窗 ════════════════════════════════════════ -->
+    <dimen name="float_default_size">80dp</dimen>
+
+</resources>

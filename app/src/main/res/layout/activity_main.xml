@@ -1,0 +1,670 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_primary"
+    android:fitsSystemWindows="true">
+
+    <!-- ══ 顶栏 ══════════════════════════════════════════ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/topbar_padding_h"
+        android:paddingEnd="@dimen/topbar_padding_h"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:minHeight="@dimen/topbar_height"
+        android:background="@color/bg_card">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/app_name"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/topbar_title_size"
+            android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/tvTopMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/mode_manual"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/topbar_mode_size"
+            android:layout_marginEnd="20dp"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/tvTopState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/state_idle"
+            android:textColor="@color/state_idle"
+            android:textSize="@dimen/topbar_state_size"
+            android:textStyle="bold"
+            android:maxLines="1" />
+
+    </LinearLayout>
+
+    <!-- ══ 主内容区（水平滚动，适配窄屏手机） ════════════ -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="@dimen/content_padding">
+
+            <!-- ══ 第一行 ════════════════════════════════════ -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <!-- ─── 卡片1：当前状态 ───────────────────── -->
+                <LinearLayout
+                    android:layout_width="@dimen/card_width_normal"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:background="@color/bg_card"
+                    android:padding="@dimen/card_padding"
+                    android:layout_margin="@dimen/card_margin">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_status"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_section_title"
+                        android:letterSpacing="0.08" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/divider_height"
+                        android:background="@color/divider"
+                        android:layout_marginTop="@dimen/section_divider_margin_top"
+                        android:layout_marginBottom="@dimen/section_divider_margin_bottom" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <View
+                            android:id="@+id/vStatusDot"
+                            android:layout_width="@dimen/status_dot_size"
+                            android:layout_height="@dimen/status_dot_size"
+                            android:background="@color/state_idle" />
+
+                        <TextView
+                            android:id="@+id/tvStateName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/state_idle"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_state_big"
+                            android:textStyle="bold"
+                            android:layout_marginStart="12dp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvStatusHint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/msg_tip_longpress"
+                        android:textColor="@color/text_hint"
+                        android:textSize="@dimen/text_hint"
+                        android:layout_marginTop="12dp" />
+
+                </LinearLayout>
+
+                <!-- ─── 卡片2：互联 App ───────────────────── -->
+                <LinearLayout
+                    android:layout_width="@dimen/card_width_normal"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:background="@color/bg_card"
+                    android:padding="@dimen/card_padding"
+                    android:layout_margin="@dimen/card_margin">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_app"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_section_title"
+                        android:letterSpacing="0.08" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/divider_height"
+                        android:background="@color/divider"
+                        android:layout_marginTop="@dimen/section_divider_margin_top"
+                        android:layout_marginBottom="@dimen/section_divider_margin_bottom" />
+
+                    <TextView
+                        android:id="@+id/tvNoAppWarning"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/msg_no_app"
+                        android:textColor="@color/text_warning"
+                        android:textSize="15sp"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/rowYilian"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/row_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <RadioButton
+                            android:id="@+id/rbYilian"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:buttonTint="@color/color_primary"
+                            android:scaleX="1.35"
+                            android:scaleY="1.35" />
+
+                        <TextView
+                            android:id="@+id/tvYilianLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/app_label_yilian"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_label"
+                            android:layout_marginStart="12dp" />
+
+                        <TextView
+                            android:id="@+id/tvYilianInstalled"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_label"
+                            android:textColor="@color/text_hint" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/rowBaidu"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/row_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="@dimen/item_margin_top">
+
+                        <RadioButton
+                            android:id="@+id/rbBaidu"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:buttonTint="@color/color_primary"
+                            android:scaleX="1.35"
+                            android:scaleY="1.35" />
+
+                        <TextView
+                            android:id="@+id/tvBaiduLabel"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/app_label_baidu"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_label"
+                            android:layout_marginStart="12dp" />
+
+                        <TextView
+                            android:id="@+id/tvBaiduInstalled"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="@dimen/text_label"
+                            android:textColor="@color/text_hint" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- ─── 卡片3：热点设置 ───────────────────── -->
+                <LinearLayout
+                    android:layout_width="@dimen/card_width_normal"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:background="@color/bg_card"
+                    android:padding="@dimen/card_padding"
+                    android:layout_margin="@dimen/card_margin">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_hotspot"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_section_title"
+                        android:letterSpacing="0.08" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/divider_height"
+                        android:background="@color/divider"
+                        android:layout_marginTop="@dimen/section_divider_margin_top"
+                        android:layout_marginBottom="@dimen/section_divider_margin_bottom" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_ssid"
+                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/text_label" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="10dp">
+
+                        <EditText
+                            android:id="@+id/etSsid"
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/input_height"
+                            android:layout_weight="1"
+                            android:background="@color/bg_input"
+                            android:textColor="@color/text_primary"
+                            android:textColorHint="@color/text_hint"
+                            android:hint="@string/msg_ssid_hint"
+                            android:textSize="@dimen/text_input"
+                            android:paddingStart="@dimen/input_padding_h"
+                            android:paddingEnd="@dimen/input_padding_h"
+                            android:singleLine="true"
+                            android:inputType="text" />
+
+                        <Button
+                            android:id="@+id/btnSsidPick"
+                            android:layout_width="56dp"
+                            android:layout_height="@dimen/input_height"
+                            android:text="&#9660;"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_input"
+                            android:background="@color/bg_card_highlight"
+                            android:padding="0dp"
+                            android:layout_marginStart="6dp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/desc_ssid"
+                        android:textColor="@color/text_hint"
+                        android:textSize="@dimen/text_hint"
+                        android:layout_marginTop="8dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- 行间距 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/row_gap" />
+
+            <!-- ══ 第二行 ════════════════════════════════════ -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <!-- ─── 卡片4：连接模式 ───────────────────── -->
+                <LinearLayout
+                    android:layout_width="@dimen/card_width_normal"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:background="@color/bg_card"
+                    android:padding="@dimen/card_padding"
+                    android:layout_margin="@dimen/card_margin">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_connect_mode"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_section_title"
+                        android:letterSpacing="0.08" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/divider_height"
+                        android:background="@color/divider"
+                        android:layout_marginTop="@dimen/section_divider_margin_top"
+                        android:layout_marginBottom="@dimen/section_divider_margin_bottom" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_connect_mode"
+                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/text_label" />
+
+                    <RadioGroup
+                        android:id="@+id/rgConnectMode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="12dp">
+
+                        <RadioButton
+                            android:id="@+id/rbWifiMode"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/mode_wifi"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp"
+                            android:buttonTint="@color/color_primary"
+                            android:checked="true" />
+
+                        <RadioButton
+                            android:id="@+id/rbHotspotMode"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/mode_hotspot"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp"
+                            android:buttonTint="@color/color_primary" />
+
+                    </RadioGroup>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/desc_connect_mode"
+                        android:textColor="@color/text_hint"
+                        android:textSize="@dimen/text_hint"
+                        android:layout_marginTop="10dp" />
+
+                </LinearLayout>
+
+                <!-- ─── 卡片5：自动模式 ───────────────────── -->
+                <LinearLayout
+                    android:layout_width="@dimen/card_width_normal"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:background="@color/bg_card"
+                    android:padding="@dimen/card_padding"
+                    android:layout_margin="@dimen/card_margin">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_auto"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_section_title"
+                        android:letterSpacing="0.08" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/divider_height"
+                        android:background="@color/divider"
+                        android:layout_marginTop="@dimen/section_divider_margin_top"
+                        android:layout_marginBottom="@dimen/section_divider_margin_bottom" />
+
+                    <!-- 自动模式开关 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/row_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_auto_mode"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_label" />
+
+                        <Switch
+                            android:id="@+id/switchAutoMode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:scaleX="1.25"
+                            android:scaleY="1.25" />
+
+                    </LinearLayout>
+
+                    <!-- 开机延时 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/row_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="@dimen/item_margin_top">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_boot_delay"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_label" />
+
+                        <EditText
+                            android:id="@+id/etBootDelay"
+                            android:layout_width="@dimen/input_width_small"
+                            android:layout_height="44dp"
+                            android:background="@color/bg_input"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_input"
+                            android:gravity="center"
+                            android:inputType="number"
+                            android:singleLine="true" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/desc_boot_delay"
+                        android:textColor="@color/text_hint"
+                        android:textSize="@dimen/text_hint"
+                        android:layout_marginBottom="@dimen/desc_margin_bottom" />
+
+                    <!-- 热点超时 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/row_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="@dimen/item_margin_top">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_hotspot_timeout"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_label" />
+
+                        <EditText
+                            android:id="@+id/etHotspotTimeout"
+                            android:layout_width="@dimen/input_width_small"
+                            android:layout_height="44dp"
+                            android:background="@color/bg_input"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_input"
+                            android:gravity="center"
+                            android:inputType="number"
+                            android:singleLine="true" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/desc_hotspot_timeout"
+                        android:textColor="@color/text_hint"
+                        android:textSize="@dimen/text_hint" />
+
+                </LinearLayout>
+
+                <!-- ─── 卡片6：高级 ───────────────────────── -->
+                <LinearLayout
+                    android:layout_width="@dimen/card_width_wide"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:background="@color/bg_card"
+                    android:padding="@dimen/card_padding"
+                    android:layout_margin="@dimen/card_margin">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_advanced"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_section_title"
+                        android:letterSpacing="0.08" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/divider_height"
+                        android:background="@color/divider"
+                        android:layout_marginTop="@dimen/section_divider_margin_top"
+                        android:layout_marginBottom="@dimen/section_divider_margin_bottom" />
+
+                    <!-- 悬浮窗开关 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/row_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_float_enabled"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_label" />
+
+                        <Switch
+                            android:id="@+id/switchFloatEnabled"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:scaleX="1.25"
+                            android:scaleY="1.25" />
+
+                    </LinearLayout>
+
+                    <!-- 悬浮窗大小 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/row_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="@dimen/item_margin_top">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_float_size"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_label" />
+
+                        <EditText
+                            android:id="@+id/etFloatSize"
+                            android:layout_width="@dimen/input_width_small"
+                            android:layout_height="44dp"
+                            android:background="@color/bg_input"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_input"
+                            android:gravity="center"
+                            android:inputType="number"
+                            android:singleLine="true" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" dp"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="13sp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvFloatPosition"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_hint"
+                        android:textSize="@dimen/text_hint"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="@dimen/desc_margin_bottom" />
+
+                    <!-- 开机自启 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/row_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="@dimen/item_margin_top">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_boot_start"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_label" />
+
+                        <Switch
+                            android:id="@+id/switchBootStart"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:scaleX="1.25"
+                            android:scaleY="1.25" />
+
+                    </LinearLayout>
+
+                    <Button
+                        android:id="@+id/btnGrantOverlay"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/perm_overlay_title"
+                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/text_button"
+                        android:background="@color/btn_danger"
+                        android:visibility="gone" />
+
+                    <Button
+                        android:id="@+id/btnViewDisclaimer"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/btn_view_disclaimer"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_button"
+                        android:background="@color/transparent" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+</LinearLayout>
