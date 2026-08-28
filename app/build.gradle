@@ -10,23 +10,35 @@ android {
     namespace 'com.maomao.hulian'
     compileSdk 33
 
+    // ══ 固定签名配置 ═══════════════════════════════════════
+    signingConfigs {
+        hulian {
+            storeFile file('hulian.keystore')
+            storePassword 'maomao2024'
+            keyAlias 'hulian'
+            keyPassword 'maomao2024'
+        }
+    }
+
     defaultConfig {
         applicationId "com.maomao.hulian"
         minSdk 26
         targetSdk 30
-        versionCode 8
-        versionName "1.7"
+        versionCode 9
+        versionName "1.8"
     }
 
     buildTypes {
         debug {
             debuggable true
             minifyEnabled false
+            signingConfig signingConfigs.hulian
         }
         release {
             debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.hulian
         }
     }
 
