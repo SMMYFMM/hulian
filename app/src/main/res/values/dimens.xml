@@ -12,8 +12,8 @@
     <dimen name="content_padding">8dp</dimen>
     <dimen name="card_margin">5dp</dimen>
     <dimen name="card_padding">16dp</dimen>
-    <dimen name="card_width_normal">250dp</dimen>
-    <dimen name="card_width_wide">270dp</dimen>
+    <dimen name="card_min_width">250dp</dimen>
+    <dimen name="card_min_width_wide">270dp</dimen>
     <dimen name="row_gap">8dp</dimen>
 
     <!-- ══ 文字大小 ══════════════════════════════════════ -->

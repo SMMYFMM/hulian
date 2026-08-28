@@ -68,20 +68,22 @@
             android:scrollbars="none">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="@dimen/content_padding">
 
             <!-- ══ 第一行 ════════════════════════════════════ -->
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <!-- ─── 卡片1：当前状态 ───────────────────── -->
                 <LinearLayout
-                    android:layout_width="@dimen/card_width_normal"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:minWidth="@dimen/card_min_width"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:background="@color/bg_card"
@@ -140,7 +142,9 @@
 
                 <!-- ─── 卡片2：互联 App ───────────────────── -->
                 <LinearLayout
-                    android:layout_width="@dimen/card_width_normal"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:minWidth="@dimen/card_min_width"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:background="@color/bg_card"
@@ -244,7 +248,9 @@
 
                 <!-- ─── 卡片3：热点设置 ───────────────────── -->
                 <LinearLayout
-                    android:layout_width="@dimen/card_width_normal"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:minWidth="@dimen/card_min_width"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:background="@color/bg_card"
@@ -326,13 +332,15 @@
 
             <!-- ══ 第二行 ════════════════════════════════════ -->
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <!-- ─── 卡片4：连接模式 ───────────────────── -->
                 <LinearLayout
-                    android:layout_width="@dimen/card_width_normal"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:minWidth="@dimen/card_min_width"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:background="@color/bg_card"
@@ -403,7 +411,9 @@
 
                 <!-- ─── 卡片5：自动模式 ───────────────────── -->
                 <LinearLayout
-                    android:layout_width="@dimen/card_width_normal"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:minWidth="@dimen/card_min_width"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:background="@color/bg_card"
@@ -526,7 +536,9 @@
 
                 <!-- ─── 卡片6：高级 ───────────────────────── -->
                 <LinearLayout
-                    android:layout_width="@dimen/card_width_wide"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:minWidth="@dimen/card_min_width_wide"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:background="@color/bg_card"
