@@ -28,6 +28,7 @@ import android.widget.RadioGroup
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import com.umeng.analytics.MobclickAgent
 
 class MainActivity : Activity() {
 
@@ -116,12 +117,18 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        MobclickAgent.onResume(this)
         checkOverlayPermission()
         loadPrefsToUI()
         updateFloatPositionText()
         MainService.instance?.let {
             updateStateUI(it.getCurrentState(), it.getCurrentMode())
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        MobclickAgent.onPause(this)
     }
 
     override fun onStart() {
@@ -483,6 +490,7 @@ class MainActivity : Activity() {
     }
 
     private fun onDisclaimerAgreed() {
+        (application as HulianApplication).initUmengIfNeeded()
         requestLocationPermission()
         startMainServiceIfNeeded()
     }
