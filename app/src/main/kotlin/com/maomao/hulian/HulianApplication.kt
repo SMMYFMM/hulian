@@ -4,7 +4,7 @@ import android.app.Application
 import com.umeng.commonsdk.UMConfigure
 
 /**
- * Application 类 —— 负责友盟SDK初始化
+ * Application 类 —— 负责签名校验 + 友盟SDK初始化
  *
  * 隐私合规说明：
  * preInit 仅预加载配置，不采集数据；
@@ -18,10 +18,19 @@ class HulianApplication : Application() {
 
         @Volatile
         private var initialized = false
+
+        /** 签名校验是否通过 */
+        fun isSignatureValid(): Boolean = SignatureVerifier.isVerified()
     }
 
     override fun onCreate() {
         super.onCreate()
+
+        // 签名校验（防二次打包）
+        val sigOk = SignatureVerifier.verify(this)
+        if (!sigOk) {
+            FileLogger.e("HulianApplication", "签名校验失败！APK可能被篡改，核心功能将被禁用")
+        }
 
         // 友盟预初始化（不采集数据，仅准备配置）
         UMConfigure.preInit(this, UMENG_APP_KEY, UMENG_CHANNEL)

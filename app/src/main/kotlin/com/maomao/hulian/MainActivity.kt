@@ -492,7 +492,19 @@ class MainActivity : Activity() {
     private fun onDisclaimerAgreed() {
         (application as HulianApplication).initUmengIfNeeded()
         requestLocationPermission()
-        startMainServiceIfNeeded()
+
+        // 签名校验通过才启动核心服务
+        if (HulianApplication.isSignatureValid()) {
+            startMainServiceIfNeeded()
+        } else {
+            FileLogger.e(TAG, "签名校验未通过，拒绝启动服务")
+            AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_Dialog_Alert)
+                .setTitle("签名校验失败")
+                .setMessage("检测到应用签名异常，可能被篡改或二次打包。\n核心功能已被禁用，请从正规渠道重新安装。")
+                .setCancelable(false)
+                .setPositiveButton(getString(R.string.btn_ok)) { _, _ -> }
+                .show()
+        }
     }
 
     @Suppress("DEPRECATION")
