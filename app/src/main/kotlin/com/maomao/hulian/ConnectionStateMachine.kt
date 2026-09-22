@@ -137,6 +137,8 @@ class ConnectionStateMachine(
                 doBtRetryThenInitiate()
             }
             is ConnectionEvent.CancelRequested -> {
+                btWifiManager.cancelPendingRequests()
+                hotspotManager.cancelPendingCallback()
                 resetToIdle()
             }
             else -> Unit
@@ -164,6 +166,8 @@ class ConnectionStateMachine(
             is ConnectionEvent.CancelRequested -> {
                 stopTimeoutCountdown()
                 hotspotMonitor.unregister()
+                btWifiManager.cancelPendingRequests()
+                hotspotManager.cancelPendingCallback()
                 resetToIdle()
             }
             else -> Unit
@@ -205,6 +209,8 @@ class ConnectionStateMachine(
                 transitionTo(ConnectionState.CONNECTED)
             }
             is ConnectionEvent.CancelRequested -> {
+                btWifiManager.cancelPendingRequests()
+                hotspotManager.cancelPendingCallback()
                 resetToIdle()
             }
             else -> Unit
@@ -257,6 +263,8 @@ class ConnectionStateMachine(
                 appMonitor.stop()
                 hotspotMonitor.unregister()
                 handler.removeCallbacks(noConnectionReminderRunnable)
+                btWifiManager.cancelPendingRequests()
+                hotspotManager.cancelPendingCallback()
                 resetToIdle()
             }
 
@@ -281,7 +289,14 @@ class ConnectionStateMachine(
             ShellExecutor.killBluetooth(prefs.btKillCommand) { result ->
                 Log.d(TAG, "vendor BT命令结果: success=${result.success}")
                 FileLogger.i(TAG, "vendor BT命令结果: success=${result.success}")
-                resetToIdle()
+                handler.post {
+                    // 防止异步回调到达时状态已被重置（如用户重启任务）
+                    if (currentState == ConnectionState.CONNECTED) {
+                        resetToIdle()
+                    } else {
+                        FileLogger.i(TAG, "killBluetooth回调到达时状态=$currentState，跳过resetToIdle")
+                    }
+                }
             }
         } else {
             resetToIdle()
@@ -382,13 +397,37 @@ class ConnectionStateMachine(
     fun triggerManual() {
         cancelAutoStart()
         currentMode = RunMode.MANUAL
+        // 如果正在运行中，先取消再重启
+        if (currentState != ConnectionState.IDLE && currentState != ConnectionState.TIMEOUT) {
+            FileLogger.i(TAG, "手动触发：当前状态=$currentState，先取消当前任务再重启")
+            forceCancel()
+        }
         onEvent(ConnectionEvent.StartRequested)
     }
 
     fun triggerBtRetry() {
         cancelAutoStart()
         if (currentMode != RunMode.AUTO) currentMode = RunMode.MANUAL
+        // 如果正在运行中，先取消再重启
+        if (currentState != ConnectionState.IDLE && currentState != ConnectionState.TIMEOUT) {
+            FileLogger.i(TAG, "BT重试触发：当前状态=$currentState，先取消当前任务再重启")
+            forceCancel()
+        }
         onEvent(ConnectionEvent.BtRetryRequested)
+    }
+
+    /**
+     * 强制取消当前任务，清理所有异步回调，回到IDLE。
+     * 与 CancelRequested 事件不同，此方法直接清理不依赖状态分支。
+     */
+    private fun forceCancel() {
+        stopTimeoutCountdown()
+        handler.removeCallbacks(noConnectionReminderRunnable)
+        hotspotMonitor.unregister()
+        appMonitor.stop()
+        btWifiManager.cancelPendingRequests()
+        hotspotManager.cancelPendingCallback()
+        resetToIdle()
     }
 
     fun triggerCancel() {

@@ -235,7 +235,11 @@ class HotspotManager(private val context: Context) {
     // ── 回调管理 ──────────────────────────────────────────
 
     private fun setupPendingCallback(timeoutMs: Long, callback: (Boolean) -> Unit) {
-        clearPendingCallback(false)
+        // 丢弃旧回调，不触发它（避免旧回调干扰新流程）
+        pendingTimeoutRunnable?.let { handler.removeCallbacks(it) }
+        pendingTimeoutRunnable = null
+        pendingCallback = null
+        // 设置新回调
         pendingCallback = callback
         pendingTimeoutRunnable = Runnable {
             val enabled = isHotspotEnabled()
@@ -249,6 +253,17 @@ class HotspotManager(private val context: Context) {
         pendingTimeoutRunnable?.let { handler.removeCallbacks(it) }
         pendingTimeoutRunnable = null
         pendingCallback?.let { handler.post { it(success) } }
+        pendingCallback = null
+    }
+
+    /**
+     * 取消挂起的热点回调，丢弃旧回调不触发。
+     * 用于状态机取消/重启时清理。
+     */
+    fun cancelPendingCallback() {
+        FileLogger.i(TAG, "取消挂起的热点回调")
+        pendingTimeoutRunnable?.let { handler.removeCallbacks(it) }
+        pendingTimeoutRunnable = null
         pendingCallback = null
     }
 

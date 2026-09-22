@@ -32,6 +32,10 @@ class BtWifiManager(private val context: Context) {
     private var wifiReceiverRegistered = false
     private var btReceiverRegistered = false
 
+    // WiFi后台使能任务ID，每次新请求递增，旧线程检测到不匹配时自动退出
+    @Volatile
+    private var wifiEnableTaskId: Int = 0
+
     private val btStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context, intent: Intent) {
             if (intent.action != BluetoothAdapter.ACTION_STATE_CHANGED) return
@@ -114,7 +118,12 @@ class BtWifiManager(private val context: Context) {
     }
 
     private fun setupPendingBtCallback(targetState: Int, timeoutMs: Long, callback: (Boolean) -> Unit) {
-        clearPendingBtCallback(false)
+        // 丢弃旧回调，不触发它（避免旧回调干扰新流程）
+        pendingBtTimeoutRunnable?.let { handler.removeCallbacks(it) }
+        pendingBtTimeoutRunnable = null
+        pendingTargetState = -1
+        pendingBtCallback = null
+        // 设置新回调
         pendingTargetState = targetState
         pendingBtCallback = callback
         pendingBtTimeoutRunnable = Runnable { FileLogger.w(TAG, "BT等待超时: $targetState"); clearPendingBtCallback(false) }
@@ -140,45 +149,69 @@ class BtWifiManager(private val context: Context) {
         FileLogger.i(TAG, "WiFi未开启，尝试多种方式开启...")
         registerWifiStateListener()
         setupPendingWifiCallback(timeoutMs, onComplete)
+
+        // 递增任务ID，使旧的后台线程自动退出
+        wifiEnableTaskId++
+        val myTaskId = wifiEnableTaskId
+
+        // 方案1: API
         @Suppress("DEPRECATION")
         val apiResult = wifiManager.setWifiEnabled(true)
         FileLogger.d(TAG, "setWifiEnabled(true)=$apiResult")
-        if (!apiResult) {
-            FileLogger.w(TAG, "API开启失败")
-            Thread { tryAlternativeEnable() }.start()
-        }
-    }
 
-    private fun tryAlternativeEnable() {
-        FileLogger.i(TAG, "方案2: 尝试 settings put global wifi_on 1")
-        val settingsResult = ShellExecutor.exec("settings put global wifi_on 1")
-        FileLogger.i(TAG, "settings结果: success=${settingsResult.success}")
-        Thread.sleep(1000)
-        if (isWifiEnabled()) { FileLogger.i(TAG, "settings命令成功!"); return }
+        // 无论API返回true还是false，都启动延迟验证线程
+        // 因为Android 9+上API可能返回true但实际未开启WiFi
+        Thread {
+            // 等待2秒让API方法生效
+            Thread.sleep(2000)
+            if (myTaskId != wifiEnableTaskId) {
+                FileLogger.d(TAG, "WiFi使能线程被取代，退出")
+                return@Thread
+            }
+            if (isWifiEnabled()) {
+                FileLogger.i(TAG, "API方式成功(延迟验证)")
+                return@Thread
+            }
 
-        FileLogger.i(TAG, "方案3: 尝试 service call wifi 24 i32 1")
-        val serviceResult = ShellExecutor.exec("service call wifi 24 i32 1")
-        FileLogger.i(TAG, "service call结果: ${serviceResult.success}")
-        Thread.sleep(1000)
-        if (isWifiEnabled()) { FileLogger.i(TAG, "service call成功!"); return }
+            FileLogger.w(TAG, "API方式未生效，尝试替代方案...")
 
-        FileLogger.i(TAG, "方案4: 检查su")
-        val suCheck = ShellExecutor.exec("which su")
-        if (suCheck.success && suCheck.output.isNotBlank()) {
-            FileLogger.d(TAG, "su可用")
-            val suResult = ShellExecutor.exec("su -c settings put global wifi_on 1")
-            FileLogger.i(TAG, "su settings结果: ${suResult.success}")
-            Thread.sleep(1000)
-            if (isWifiEnabled()) { FileLogger.i(TAG, "su settings成功!"); return }
-            ShellExecutor.exec("su -c svc wifi enable")
-            Thread.sleep(1000)
-            if (isWifiEnabled()) { FileLogger.i(TAG, "su svc成功!"); return }
-        } else {
-            FileLogger.w(TAG, "su不可用")
-        }
+            // 方案2: settings put global wifi_on 1
+            FileLogger.i(TAG, "方案2: 尝试 settings put global wifi_on 1")
+            val settingsResult = ShellExecutor.exec("settings put global wifi_on 1")
+            FileLogger.i(TAG, "settings结果: success=${settingsResult.success}")
+            Thread.sleep(2000)
+            if (myTaskId != wifiEnableTaskId) return@Thread
+            if (isWifiEnabled()) { FileLogger.i(TAG, "settings命令成功!"); return@Thread }
 
-        FileLogger.w(TAG, "所有自动方式均失败，打开WiFi设置页面")
-        handler.post { openWifiSettingsWithPrompt() }
+            // 方案3: service call wifi 24 i32 1
+            FileLogger.i(TAG, "方案3: 尝试 service call wifi 24 i32 1")
+            val serviceResult = ShellExecutor.exec("service call wifi 24 i32 1")
+            FileLogger.i(TAG, "service call结果: ${serviceResult.success}")
+            Thread.sleep(2000)
+            if (myTaskId != wifiEnableTaskId) return@Thread
+            if (isWifiEnabled()) { FileLogger.i(TAG, "service call成功!"); return@Thread }
+
+            // 方案4: su root
+            FileLogger.i(TAG, "方案4: 检查su")
+            val suCheck = ShellExecutor.exec("which su")
+            if (suCheck.success && suCheck.output.isNotBlank()) {
+                FileLogger.d(TAG, "su可用")
+                val suResult = ShellExecutor.exec("su -c settings put global wifi_on 1")
+                FileLogger.i(TAG, "su settings结果: ${suResult.success}")
+                Thread.sleep(2000)
+                if (myTaskId != wifiEnableTaskId) return@Thread
+                if (isWifiEnabled()) { FileLogger.i(TAG, "su settings成功!"); return@Thread }
+                ShellExecutor.exec("su -c svc wifi enable")
+                Thread.sleep(2000)
+                if (myTaskId != wifiEnableTaskId) return@Thread
+                if (isWifiEnabled()) { FileLogger.i(TAG, "su svc成功!"); return@Thread }
+            } else {
+                FileLogger.w(TAG, "su不可用")
+            }
+
+            FileLogger.w(TAG, "所有自动方式均失败，打开WiFi设置页面")
+            handler.post { openWifiSettingsWithPrompt() }
+        }.start()
     }
 
     private fun openWifiSettingsWithPrompt() {
@@ -203,7 +236,11 @@ class BtWifiManager(private val context: Context) {
     }
 
     private fun setupPendingWifiCallback(timeoutMs: Long, callback: (Boolean) -> Unit) {
-        clearPendingWifiCallback(false)
+        // 丢弃旧回调，不触发它（避免旧回调干扰新流程）
+        pendingWifiTimeoutRunnable?.let { handler.removeCallbacks(it) }
+        pendingWifiTimeoutRunnable = null
+        pendingWifiCallback = null
+        // 设置新回调
         pendingWifiCallback = callback
         pendingWifiTimeoutRunnable = Runnable {
             val enabled = isWifiEnabled()
@@ -260,5 +297,24 @@ class BtWifiManager(private val context: Context) {
         unregisterBtStateListener()
         unregisterWifiStateListener()
         onBtStateChanged = null
+    }
+
+    /**
+     * 取消所有挂起的 BT/WiFi 异步回调，丢弃旧回调不触发。
+     * 用于状态机取消/重启时清理，防止旧回调干扰新流程。
+     */
+    fun cancelPendingRequests() {
+        FileLogger.i(TAG, "取消所有挂起的BT/WiFi回调")
+        // BT
+        pendingBtTimeoutRunnable?.let { handler.removeCallbacks(it) }
+        pendingBtTimeoutRunnable = null
+        pendingTargetState = -1
+        pendingBtCallback = null
+        // WiFi
+        pendingWifiTimeoutRunnable?.let { handler.removeCallbacks(it) }
+        pendingWifiTimeoutRunnable = null
+        pendingWifiCallback = null
+        // 使后台WiFi使能线程自动退出
+        wifiEnableTaskId++
     }
 }
