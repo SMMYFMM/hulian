@@ -394,13 +394,25 @@ class ConnectionStateMachine(
         transitionTo(ConnectionState.IDLE)
     }
 
+    private val restartAfterCancelRunnable = Runnable {
+        FileLogger.i(TAG, "取消后延时到达，开始重新启动任务")
+        onEvent(ConnectionEvent.StartRequested)
+    }
+
+    private val restartAfterBtRetryRunnable = Runnable {
+        FileLogger.i(TAG, "取消后延时到达，开始BT重试")
+        onEvent(ConnectionEvent.BtRetryRequested)
+    }
+
     fun triggerManual() {
         cancelAutoStart()
         currentMode = RunMode.MANUAL
-        // 如果正在运行中，先取消再重启
+        // 如果正在运行中，先取消，延时后重启（让用户看到紫色IDLE状态）
         if (currentState != ConnectionState.IDLE && currentState != ConnectionState.TIMEOUT) {
-            FileLogger.i(TAG, "手动触发：当前状态=$currentState，先取消当前任务再重启")
+            FileLogger.i(TAG, "手动触发：当前状态=$currentState，先取消当前任务，400ms后重启")
             forceCancel()
+            handler.postDelayed(restartAfterCancelRunnable, 400)
+            return
         }
         onEvent(ConnectionEvent.StartRequested)
     }
@@ -408,10 +420,12 @@ class ConnectionStateMachine(
     fun triggerBtRetry() {
         cancelAutoStart()
         if (currentMode != RunMode.AUTO) currentMode = RunMode.MANUAL
-        // 如果正在运行中，先取消再重启
+        // 如果正在运行中，先取消，延时后重启
         if (currentState != ConnectionState.IDLE && currentState != ConnectionState.TIMEOUT) {
-            FileLogger.i(TAG, "BT重试触发：当前状态=$currentState，先取消当前任务再重启")
+            FileLogger.i(TAG, "BT重试触发：当前状态=$currentState，先取消当前任务，400ms后BT重试")
             forceCancel()
+            handler.postDelayed(restartAfterBtRetryRunnable, 400)
+            return
         }
         onEvent(ConnectionEvent.BtRetryRequested)
     }
@@ -423,6 +437,8 @@ class ConnectionStateMachine(
     private fun forceCancel() {
         stopTimeoutCountdown()
         handler.removeCallbacks(noConnectionReminderRunnable)
+        handler.removeCallbacks(restartAfterCancelRunnable)
+        handler.removeCallbacks(restartAfterBtRetryRunnable)
         hotspotMonitor.unregister()
         appMonitor.stop()
         btWifiManager.cancelPendingRequests()
@@ -438,6 +454,8 @@ class ConnectionStateMachine(
         cancelAutoStart()
         stopTimeoutCountdown()
         handler.removeCallbacks(noConnectionReminderRunnable)
+        handler.removeCallbacks(restartAfterCancelRunnable)
+        handler.removeCallbacks(restartAfterBtRetryRunnable)
         appMonitor.release()
         hotspotMonitor.release()
         btWifiManager.release()

@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -38,6 +40,18 @@ class FloatingWindow(
     private var initialTouchY = 0f
     private var isDragging = false
     private val dragThreshold = 10f
+
+    // 手动长按检测
+    private val handler = Handler(Looper.getMainLooper())
+    private var longPressTriggered = false
+    private val longPressDelay = 500L
+    private val longPressRunnable = Runnable {
+        if (!isDragging) {
+            longPressTriggered = true
+            FileLogger.i(TAG, "悬浮球长按触发")
+            onLongClick?.invoke()
+        }
+    }
 
     private fun buildLayoutParams(): WindowManager.LayoutParams {
         val sizePx = dpToPx(prefs.floatWinSize)
@@ -146,17 +160,25 @@ class FloatingWindow(
         statusText?.text = text
     }
 
+    /**
+     * 完全自主管理触摸事件，不依赖Android的click/longClick检测。
+     * 所有事件返回true（消费），手动判断点击/长按/拖拽。
+     */
     private fun setupTouchListener(view: View) {
         view.setOnTouchListener { _, event ->
-            val params = view.layoutParams as WindowManager.LayoutParams
+            val params = view.layoutParams as? WindowManager.LayoutParams ?: return@setOnTouchListener true
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    FileLogger.d(TAG, "触摸ACTION_DOWN")
                     initialX = params.x
                     initialY = params.y
                     initialTouchX = event.rawX
                     initialTouchY = event.rawY
                     isDragging = false
-                    false
+                    longPressTriggered = false
+                    // 启动长按定时器
+                    handler.postDelayed(longPressRunnable, longPressDelay)
+                    true  // 消费事件
                 }
                 MotionEvent.ACTION_MOVE -> {
                     val dx = event.rawX - initialTouchX
@@ -165,7 +187,7 @@ class FloatingWindow(
                         (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold)
                     ) {
                         isDragging = true
-                        view.cancelLongPress()
+                        handler.removeCallbacks(longPressRunnable)
                     }
                     if (isDragging) {
                         params.x = initialX + dx.toInt()
@@ -176,31 +198,28 @@ class FloatingWindow(
                             Log.w(TAG, "updateViewLayout失败: ${e.message}")
                         }
                     }
-                    isDragging
+                    true  // 消费事件
                 }
                 MotionEvent.ACTION_UP -> {
+                    handler.removeCallbacks(longPressRunnable)
                     if (isDragging) {
+                        // 拖拽结束，保存位置
                         prefs.floatWinX = params.x
                         prefs.floatWinY = params.y
-                        Log.d(TAG, "悬浮窗位置已保存: (${params.x}, ${params.y})")
+                        FileLogger.d(TAG, "悬浮窗位置已保存: (${params.x}, ${params.y})")
+                    } else if (!longPressTriggered) {
+                        // 未拖拽且未长按 = 单击
+                        FileLogger.i(TAG, "悬浮球单击触发")
+                        onSingleClick?.invoke()
                     }
-                    isDragging
+                    true  // 消费事件
                 }
-                else -> false
+                MotionEvent.ACTION_CANCEL -> {
+                    handler.removeCallbacks(longPressRunnable)
+                    true
+                }
+                else -> true
             }
-        }
-
-        view.setOnClickListener {
-            if (!isDragging) {
-                Log.d(TAG, "悬浮窗单击")
-                onSingleClick?.invoke()
-            }
-        }
-
-        view.setOnLongClickListener {
-            Log.d(TAG, "悬浮窗长按")
-            onLongClick?.invoke()
-            true
         }
     }
 
@@ -218,6 +237,7 @@ class FloatingWindow(
     }
 
     fun release() {
+        handler.removeCallbacks(longPressRunnable)
         hide()
         onSingleClick = null
         onLongClick = null

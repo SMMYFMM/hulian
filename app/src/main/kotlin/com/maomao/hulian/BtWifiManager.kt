@@ -140,7 +140,7 @@ class BtWifiManager(private val context: Context) {
 
     fun isWifiEnabled(): Boolean = wifiManager.isWifiEnabled
 
-    fun enableWifiIfNeeded(onComplete: (Boolean) -> Unit, timeoutMs: Long = 15000L) {
+    fun enableWifiIfNeeded(onComplete: (Boolean) -> Unit, timeoutMs: Long = 20000L) {
         if (isWifiEnabled()) {
             FileLogger.i(TAG, "WiFi已是开启状态")
             onComplete(true)
@@ -154,60 +154,103 @@ class BtWifiManager(private val context: Context) {
         wifiEnableTaskId++
         val myTaskId = wifiEnableTaskId
 
-        // 方案1: API
+        // 方案1: WifiManager API
         @Suppress("DEPRECATION")
         val apiResult = wifiManager.setWifiEnabled(true)
         FileLogger.d(TAG, "setWifiEnabled(true)=$apiResult")
 
         // 无论API返回true还是false，都启动延迟验证线程
-        // 因为Android 9+上API可能返回true但实际未开启WiFi
         Thread {
-            // 等待2秒让API方法生效
-            Thread.sleep(2000)
+            // 等待3秒让API方法生效
+            Thread.sleep(3000)
             if (myTaskId != wifiEnableTaskId) {
                 FileLogger.d(TAG, "WiFi使能线程被取代，退出")
                 return@Thread
             }
             if (isWifiEnabled()) {
-                FileLogger.i(TAG, "API方式成功(延迟验证)")
+                FileLogger.i(TAG, "方案1成功: API方式开启WiFi")
                 return@Thread
             }
+            FileLogger.w(TAG, "方案1未生效，尝试替代方案...")
 
-            FileLogger.w(TAG, "API方式未生效，尝试替代方案...")
-
-            // 方案2: settings put global wifi_on 1
-            FileLogger.i(TAG, "方案2: 尝试 settings put global wifi_on 1")
-            val settingsResult = ShellExecutor.exec("settings put global wifi_on 1")
-            FileLogger.i(TAG, "settings结果: success=${settingsResult.success}")
-            Thread.sleep(2000)
+            // 方案2: settings put global wifi_on 1 + svc wifi enable
+            FileLogger.i(TAG, "方案2: settings put global wifi_on 1")
+            ShellExecutor.exec("settings put global wifi_on 1")
+            Thread.sleep(3000)
             if (myTaskId != wifiEnableTaskId) return@Thread
-            if (isWifiEnabled()) { FileLogger.i(TAG, "settings命令成功!"); return@Thread }
+            if (isWifiEnabled()) { FileLogger.i(TAG, "方案2成功: settings命令"); return@Thread }
 
-            // 方案3: service call wifi 24 i32 1
-            FileLogger.i(TAG, "方案3: 尝试 service call wifi 24 i32 1")
-            val serviceResult = ShellExecutor.exec("service call wifi 24 i32 1")
-            FileLogger.i(TAG, "service call结果: ${serviceResult.success}")
-            Thread.sleep(2000)
+            // 方案3: service call (Android 9 格式: packageName + boolean)
+            FileLogger.i(TAG, "方案3a: service call wifi 24 s16 com.maomao.hulian i32 1")
+            ShellExecutor.exec("service call wifi 24 s16 com.maomao.hulian i32 1")
+            Thread.sleep(3000)
             if (myTaskId != wifiEnableTaskId) return@Thread
-            if (isWifiEnabled()) { FileLogger.i(TAG, "service call成功!"); return@Thread }
+            if (isWifiEnabled()) { FileLogger.i(TAG, "方案3a成功: service call(带包名)"); return@Thread }
 
-            // 方案4: su root
-            FileLogger.i(TAG, "方案4: 检查su")
+            // 方案3b: service call (旧格式: 仅boolean)
+            FileLogger.i(TAG, "方案3b: service call wifi 24 i32 1")
+            ShellExecutor.exec("service call wifi 24 i32 1")
+            Thread.sleep(3000)
+            if (myTaskId != wifiEnableTaskId) return@Thread
+            if (isWifiEnabled()) { FileLogger.i(TAG, "方案3b成功: service call(旧格式)"); return@Thread }
+
+            // 方案4: service call transaction 29 (备选transaction code)
+            FileLogger.i(TAG, "方案4: service call wifi 29 i32 1 (备选code)")
+            ShellExecutor.exec("service call wifi 29 i32 1")
+            Thread.sleep(3000)
+            if (myTaskId != wifiEnableTaskId) return@Thread
+            if (isWifiEnabled()) { FileLogger.i(TAG, "方案4成功: service call code 29"); return@Thread }
+
+            // 方案5: su root 方式
+            FileLogger.i(TAG, "方案5: 检查su")
             val suCheck = ShellExecutor.exec("which su")
             if (suCheck.success && suCheck.output.isNotBlank()) {
                 FileLogger.d(TAG, "su可用")
-                val suResult = ShellExecutor.exec("su -c settings put global wifi_on 1")
-                FileLogger.i(TAG, "su settings结果: ${suResult.success}")
-                Thread.sleep(2000)
-                if (myTaskId != wifiEnableTaskId) return@Thread
-                if (isWifiEnabled()) { FileLogger.i(TAG, "su settings成功!"); return@Thread }
+
+                // 5a: su + svc wifi enable
+                FileLogger.i(TAG, "方案5a: su -c svc wifi enable")
                 ShellExecutor.exec("su -c svc wifi enable")
-                Thread.sleep(2000)
+                Thread.sleep(3000)
                 if (myTaskId != wifiEnableTaskId) return@Thread
-                if (isWifiEnabled()) { FileLogger.i(TAG, "su svc成功!"); return@Thread }
+                if (isWifiEnabled()) { FileLogger.i(TAG, "方案5a成功: su svc"); return@Thread }
+
+                // 5b: su + service call (带包名)
+                FileLogger.i(TAG, "方案5b: su -c service call wifi 24 s16 com.maomao.hulian i32 1")
+                ShellExecutor.exec("su -c service call wifi 24 s16 com.maomao.hulian i32 1")
+                Thread.sleep(3000)
+                if (myTaskId != wifiEnableTaskId) return@Thread
+                if (isWifiEnabled()) { FileLogger.i(TAG, "方案5b成功: su service call"); return@Thread }
+
+                // 5c: su + settings + svc组合
+                FileLogger.i(TAG, "方案5c: su -c settings put global wifi_on 1")
+                ShellExecutor.exec("su -c settings put global wifi_on 1")
+                Thread.sleep(1000)
+                ShellExecutor.exec("su -c svc wifi enable")
+                Thread.sleep(3000)
+                if (myTaskId != wifiEnableTaskId) return@Thread
+                if (isWifiEnabled()) { FileLogger.i(TAG, "方案5c成功: su组合"); return@Thread }
+
+                // 5d: su + cmd wifi (Android 10+命令，部分Android 9也可用)
+                FileLogger.i(TAG, "方案5d: su -c cmd wifi set-wifi-enabled enabled")
+                ShellExecutor.exec("su -c cmd wifi set-wifi-enabled enabled")
+                Thread.sleep(3000)
+                if (myTaskId != wifiEnableTaskId) return@Thread
+                if (isWifiEnabled()) { FileLogger.i(TAG, "方案5d成功: su cmd wifi"); return@Thread }
             } else {
-                FileLogger.w(TAG, "su不可用")
+                FileLogger.w(TAG, "su不可用，跳过root方案")
             }
+
+            // 方案6: WiFi开关切换（先关再开）
+            FileLogger.i(TAG, "方案6: WiFi开关切换(先关再开)")
+            @Suppress("DEPRECATION")
+            wifiManager.setWifiEnabled(false)
+            Thread.sleep(1000)
+            if (myTaskId != wifiEnableTaskId) return@Thread
+            @Suppress("DEPRECATION")
+            wifiManager.setWifiEnabled(true)
+            Thread.sleep(3000)
+            if (myTaskId != wifiEnableTaskId) return@Thread
+            if (isWifiEnabled()) { FileLogger.i(TAG, "方案6成功: 开关切换"); return@Thread }
 
             FileLogger.w(TAG, "所有自动方式均失败，打开WiFi设置页面")
             handler.post { openWifiSettingsWithPrompt() }
