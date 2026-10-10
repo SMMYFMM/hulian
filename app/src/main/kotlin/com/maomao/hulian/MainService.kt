@@ -16,7 +16,6 @@ class MainService : Service(), StateListener {
 
     private lateinit var prefs: PrefsHelper
     private lateinit var btWifiManager: BtWifiManager
-    private lateinit var hotspotManager: HotspotManager
     private lateinit var hotspotMonitor: HotspotMonitor
     private lateinit var appMonitor: AppMonitor
     private lateinit var appLauncher: AppLauncher
@@ -76,16 +75,13 @@ class MainService : Service(), StateListener {
         prefs = PrefsHelper(this)
 
         btWifiManager = BtWifiManager(this)
-        hotspotManager = HotspotManager(this)
         hotspotMonitor = HotspotMonitor(this, prefs)
         appMonitor = AppMonitor(this)
         appLauncher = AppLauncher(this)
 
         stateMachine = ConnectionStateMachine(
-            context = this,
             prefs = prefs,
             btWifiManager = btWifiManager,
-            hotspotManager = hotspotManager,
             hotspotMonitor = hotspotMonitor,
             appMonitor = appMonitor,
             appLauncher = appLauncher

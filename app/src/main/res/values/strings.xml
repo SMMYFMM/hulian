@@ -21,14 +21,11 @@
     <!-- ══ 运行模式 ═════════════════════════════════════ -->
     <string name="mode_manual">&#25163;&#21160;&#27169;&#24335;</string>
     <string name="mode_auto">&#33258;&#21160;&#27169;&#24335;</string>
-    <string name="mode_wifi">WiFi模式</string>
-    <string name="mode_hotspot">热点模式</string>
 
     <!-- ══ 主界面区块标题 ══════════════════════════════ -->
     <string name="section_status">&#24403;&#21069;&#29366;&#24577;</string>
     <string name="section_app">&#20114;&#32852; App</string>
     <string name="section_hotspot">&#28909;&#28857;&#35774;&#32622;</string>
-    <string name="section_connect_mode">连接模式</string>
     <string name="section_auto">&#33258;&#21160;&#27169;&#24335;</string>
     <string name="section_float">&#24748;&#28014;&#31383;</string>
     <string name="section_advanced">&#39640;&#32423;</string>
@@ -43,14 +40,12 @@
     <string name="label_float_size">&#24748;&#28014;&#31383;&#22823;&#23567;</string>
     <string name="label_bt_command">&#34013;&#29273;&#20851;&#38381;&#21629;&#20196;</string>
     <string name="label_boot_start">&#24320;&#26426;&#33258;&#21551;</string>
-    <string name="label_connect_mode">连接模式</string>
 
     <!-- ══ 设置项说明 ══════════════════════════════════ -->
     <string name="desc_boot_delay">&#24320;&#26426;&#21518;&#24310;&#36831;&#35813;&#31186;&#25968;&#33258;&#21160;&#24320;&#22987;&#20114;&#32852;&#27969;&#31243;</string>
     <string name="desc_hotspot_timeout">&#36229;&#36807;&#35813;&#26102;&#38388;&#26410;&#36830;&#19978;&#28909;&#28857;&#21017;&#26174;&#31034;&#36229;&#26102;</string>
     <string name="desc_bt_command">&#25163;&#21160;&#27169;&#24335;&#32467;&#26463;&#26102;&#25191;&#34892;&#30340; Shell &#21629;&#20196;</string>
     <string name="desc_ssid">&#36873;&#25321;&#24050;&#20445;&#23384;&#25110;&#25163;&#21160;&#36755;&#20837;</string>
-    <string name="desc_connect_mode">WiFi模式：车机连接手机热点；热点模式：车机开启热点供手机连接</string>
 
     <!-- ══ 按钮 ═════════════════════════════════════════ -->
     <string name="btn_ok">&#30830;&#35748;</string>

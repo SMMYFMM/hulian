@@ -1,16 +1,12 @@
 package com.maomao.hulian
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
 
 class ConnectionStateMachine(
-    private val context: Context,
     private val prefs: PrefsHelper,
     private val btWifiManager: BtWifiManager,
-    private val hotspotManager: HotspotManager,
     private val hotspotMonitor: HotspotMonitor,
     private val appMonitor: AppMonitor,
     private val appLauncher: AppLauncher
@@ -28,15 +24,6 @@ class ConnectionStateMachine(
 
     private var wifiDisconnectedFromTarget = false
     private var btTurnedOff = false
-
-    // 热点模式：互联App启动后的"无手机连接"提醒定时器
-    private var hotspotReminderShown = false
-    private val noConnectionReminderRunnable = Runnable {
-        if (hotspotReminderShown) return@Runnable
-        hotspotReminderShown = true
-        FileLogger.w(TAG, "热点模式：互联App启动后60秒内无手机连接到车机热点，发出提醒")
-        Toast.makeText(context, "请确认手机已连接车机热点", Toast.LENGTH_LONG).show()
-    }
 
     private val timeoutRunnable = Runnable {
         Log.d(TAG, "热点等待超时")
@@ -71,7 +58,7 @@ class ConnectionStateMachine(
         btWifiManager.registerBtStateListener()
 
         Log.d(TAG, "状态机初始化完成")
-        FileLogger.i(TAG, "状态机初始化完成, 连接模式=${prefs.connectMode}")
+        FileLogger.i(TAG, "状态机初始化完成")
     }
 
     fun scheduleAutoStart() {
@@ -93,7 +80,7 @@ class ConnectionStateMachine(
 
     fun onEvent(event: ConnectionEvent) {
         Log.d(TAG, "onEvent=$event  state=$currentState  mode=$currentMode")
-        FileLogger.i(TAG, "事件: $event | 状态: $currentState | 模式: $currentMode | 连接模式: ${prefs.connectMode}")
+        FileLogger.i(TAG, "事件: $event | 状态: $currentState | 模式: $currentMode")
         when (currentState) {
             ConnectionState.IDLE            -> handleIdle(event)
             ConnectionState.INITIATING      -> handleInitiating(event)
@@ -122,23 +109,16 @@ class ConnectionStateMachine(
     private fun handleInitiating(event: ConnectionEvent) {
         when (event) {
             is ConnectionEvent.BtWifiReady -> {
-                // WiFi模式：进入等待热点连接
+                // 进入等待热点连接
                 hotspotMonitor.register()
                 startTimeoutCountdown()
                 transitionTo(ConnectionState.WAITING_HOTSPOT)
-            }
-            is ConnectionEvent.HotspotReady -> {
-                // 热点模式：热点已开启，直接启动互联App
-                FileLogger.i(TAG, "热点已开启，直接启动互联App（跳过等待）")
-                transitionTo(ConnectionState.LAUNCHING)
-                doLaunch()
             }
             is ConnectionEvent.BtRetryRequested -> {
                 doBtRetryThenInitiate()
             }
             is ConnectionEvent.CancelRequested -> {
                 btWifiManager.cancelPendingRequests()
-                hotspotManager.cancelPendingCallback()
                 resetToIdle()
             }
             else -> Unit
@@ -167,7 +147,6 @@ class ConnectionStateMachine(
                 stopTimeoutCountdown()
                 hotspotMonitor.unregister()
                 btWifiManager.cancelPendingRequests()
-                hotspotManager.cancelPendingCallback()
                 resetToIdle()
             }
             else -> Unit
@@ -197,20 +176,14 @@ class ConnectionStateMachine(
                 wifiDisconnectedFromTarget = false
                 btTurnedOff = false
 
-                if (prefs.connectMode == ConnectMode.HOTSPOT_MODE) {
-                    // 热点模式：启动后不等待连接，启动"无连接提醒"定时器
-                    handler.postDelayed(noConnectionReminderRunnable, 60000L)
-                } else {
-                    // WiFi模式：重新注册热点监听
-                    hotspotMonitor.register()
-                }
+                // 重新注册热点监听
+                hotspotMonitor.register()
 
                 appMonitor.start(prefs.targetAppPkg)
                 transitionTo(ConnectionState.CONNECTED)
             }
             is ConnectionEvent.CancelRequested -> {
                 btWifiManager.cancelPendingRequests()
-                hotspotManager.cancelPendingCallback()
                 resetToIdle()
             }
             else -> Unit
@@ -224,12 +197,6 @@ class ConnectionStateMachine(
                 FileLogger.i(TAG, "互联App退出，回到IDLE")
                 appMonitor.stop()
                 hotspotMonitor.unregister()
-                handler.removeCallbacks(noConnectionReminderRunnable)
-
-                // 热点模式下，退出时关闭热点
-                if (prefs.connectMode == ConnectMode.HOTSPOT_MODE) {
-                    hotspotManager.disableHotspot()
-                }
 
                 resetToIdle()
             }
@@ -254,7 +221,6 @@ class ConnectionStateMachine(
             is ConnectionEvent.BtRetryRequested -> {
                 appMonitor.stop()
                 hotspotMonitor.unregister()
-                handler.removeCallbacks(noConnectionReminderRunnable)
                 transitionTo(ConnectionState.INITIATING)
                 doBtRetryThenInitiate()
             }
@@ -262,9 +228,7 @@ class ConnectionStateMachine(
             is ConnectionEvent.CancelRequested -> {
                 appMonitor.stop()
                 hotspotMonitor.unregister()
-                handler.removeCallbacks(noConnectionReminderRunnable)
                 btWifiManager.cancelPendingRequests()
-                hotspotManager.cancelPendingCallback()
                 resetToIdle()
             }
 
@@ -278,12 +242,6 @@ class ConnectionStateMachine(
         Log.d(TAG, "条件3满足，开始清理，模式=$currentMode")
         FileLogger.i(TAG, "条件3满足，开始清理，模式=$currentMode")
         appMonitor.stop()
-        handler.removeCallbacks(noConnectionReminderRunnable)
-
-        // 热点模式下，结束时关闭热点
-        if (prefs.connectMode == ConnectMode.HOTSPOT_MODE) {
-            hotspotManager.disableHotspot()
-        }
 
         if (currentMode == RunMode.MANUAL) {
             ShellExecutor.killBluetooth(prefs.btKillCommand) { result ->
@@ -304,41 +262,23 @@ class ConnectionStateMachine(
     }
 
     private fun doInitiating() {
-        FileLogger.i(TAG, "doInitiating: 开始初始化流程，连接模式=${prefs.connectMode}")
+        FileLogger.i(TAG, "doInitiating: 开始初始化流程")
 
         btWifiManager.enableBtIfNeeded(onComplete = { btSuccess ->
             if (!btSuccess) FileLogger.w(TAG, "BT开启超时，继续流程")
             FileLogger.i(TAG, "BT已就绪")
 
-            if (prefs.connectMode == ConnectMode.HOTSPOT_MODE) {
-                // 热点模式：开启车机热点
-                FileLogger.i(TAG, "热点模式：开始开启车机热点")
-                hotspotManager.enableHotspot(onComplete = { hotspotSuccess ->
-                    if (!hotspotSuccess) FileLogger.w(TAG, "热点开启超时或失败")
-                    FileLogger.i(TAG, "热点流程完成, success=$hotspotSuccess")
-                    handler.post {
-                        if (hotspotSuccess) {
-                            onEvent(ConnectionEvent.HotspotReady)
-                        } else {
-                            // 热点开启失败，仍打开设置页面
-                            hotspotManager.openHotspotSettings()
-                            onEvent(ConnectionEvent.HotspotReady)
-                        }
+            // 开启WiFi
+            btWifiManager.enableWifiIfNeeded(onComplete = { wifiSuccess ->
+                if (!wifiSuccess) FileLogger.w(TAG, "WiFi开启超时或失败")
+                FileLogger.i(TAG, "WiFi已就绪, success=$wifiSuccess")
+                handler.post {
+                    if (wifiSuccess) {
+                        btWifiManager.openWifiSettings()
                     }
-                }, timeoutMs = 30000L)
-            } else {
-                // WiFi模式：开启WiFi
-                btWifiManager.enableWifiIfNeeded(onComplete = { wifiSuccess ->
-                    if (!wifiSuccess) FileLogger.w(TAG, "WiFi开启超时或失败")
-                    FileLogger.i(TAG, "WiFi已就绪, success=$wifiSuccess")
-                    handler.post {
-                        if (wifiSuccess) {
-                            btWifiManager.openWifiSettings()
-                        }
-                        onEvent(ConnectionEvent.BtWifiReady)
-                    }
-                }, timeoutMs = 30000L)
-            }
+                    onEvent(ConnectionEvent.BtWifiReady)
+                }
+            }, timeoutMs = 30000L)
         }, timeoutMs = 12000L)
     }
 
@@ -390,7 +330,6 @@ class ConnectionStateMachine(
     private fun resetToIdle() {
         wifiDisconnectedFromTarget = false
         btTurnedOff = false
-        hotspotReminderShown = false
         transitionTo(ConnectionState.IDLE)
     }
 
@@ -436,13 +375,11 @@ class ConnectionStateMachine(
      */
     private fun forceCancel() {
         stopTimeoutCountdown()
-        handler.removeCallbacks(noConnectionReminderRunnable)
         handler.removeCallbacks(restartAfterCancelRunnable)
         handler.removeCallbacks(restartAfterBtRetryRunnable)
         hotspotMonitor.unregister()
         appMonitor.stop()
         btWifiManager.cancelPendingRequests()
-        hotspotManager.cancelPendingCallback()
         resetToIdle()
     }
 
@@ -453,13 +390,11 @@ class ConnectionStateMachine(
     fun release() {
         cancelAutoStart()
         stopTimeoutCountdown()
-        handler.removeCallbacks(noConnectionReminderRunnable)
         handler.removeCallbacks(restartAfterCancelRunnable)
         handler.removeCallbacks(restartAfterBtRetryRunnable)
         appMonitor.release()
         hotspotMonitor.release()
         btWifiManager.release()
-        hotspotManager.release()
         stateListener = null
         Log.d(TAG, "状态机已释放")
         FileLogger.i(TAG, "状态机已释放")

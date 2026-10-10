@@ -50,11 +50,10 @@
 -keep class com.maomao.hulian.SignatureVerifier { *; }
 
 # ══ 使用反射的类 ─────────────────────────────────────
-# BtWifiManager / HotspotManager 通过反射调用 WifiManager 隐藏方法
+# BtWifiManager 通过反射调用 WifiManager 隐藏方法
 # 这些反射目标是 Android 框架类，不会被 R8 混淆，无需额外 keep
 # 但我们的管理类本身需要保留（被 MainService 引用）
 -keep class com.maomao.hulian.BtWifiManager { *; }
--keep class com.maomao.hulian.HotspotManager { *; }
 -keep class com.maomao.hulian.HotspotMonitor { *; }
 -keep class com.maomao.hulian.ConnectionStateMachine { *; }
 -keep class com.maomao.hulian.ConnectionStateMachine$* { *; }

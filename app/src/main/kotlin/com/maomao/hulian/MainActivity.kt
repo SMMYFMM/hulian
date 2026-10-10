@@ -24,7 +24,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.RadioButton
-import android.widget.RadioGroup
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -49,13 +48,12 @@ class MainActivity : Activity() {
     private lateinit var tvYilianInstalled: TextView
     private lateinit var tvBaiduInstalled: TextView
 
+    // 实际检测到的互联App包名（兼容共存版，可能带后缀）
+    private var yilianInstalledPkg: String? = null
+    private var baiduInstalledPkg: String? = null
+
     private lateinit var etSsid: EditText
     private lateinit var btnSsidPick: Button
-
-    // 连接模式
-    private lateinit var rgConnectMode: RadioGroup
-    private lateinit var rbWifiMode: RadioButton
-    private lateinit var rbHotspotMode: RadioButton
 
     private lateinit var switchAutoMode: Switch
     private lateinit var etBootDelay: EditText
@@ -173,10 +171,6 @@ class MainActivity : Activity() {
         etSsid           = findViewById(R.id.etSsid)
         btnSsidPick      = findViewById(R.id.btnSsidPick)
 
-        rgConnectMode    = findViewById(R.id.rgConnectMode)
-        rbWifiMode       = findViewById(R.id.rbWifiMode)
-        rbHotspotMode    = findViewById(R.id.rbHotspotMode)
-
         switchAutoMode   = findViewById(R.id.switchAutoMode)
         etBootDelay      = findViewById(R.id.etBootDelay)
         etHotspotTimeout = findViewById(R.id.etHotspotTimeout)
@@ -198,12 +192,12 @@ class MainActivity : Activity() {
     private fun setupListeners() {
         rbYilian.setOnClickListener {
             rbBaidu.isChecked = false
-            prefs.targetAppPkg   = PrefsHelper.PKG_YILIAN
+            prefs.targetAppPkg   = yilianInstalledPkg ?: PrefsHelper.PKG_YILIAN
             prefs.targetAppLabel = getString(R.string.app_label_yilian)
         }
         rbBaidu.setOnClickListener {
             rbYilian.isChecked = false
-            prefs.targetAppPkg   = PrefsHelper.PKG_BAIDU
+            prefs.targetAppPkg   = baiduInstalledPkg ?: PrefsHelper.PKG_BAIDU
             prefs.targetAppLabel = getString(R.string.app_label_baidu)
         }
 
@@ -213,19 +207,6 @@ class MainActivity : Activity() {
             }
         })
         btnSsidPick.setOnClickListener { showSsidPickerDialog() }
-
-        // 连接模式
-        rgConnectMode.setOnCheckedChangeListener { _, checkedId ->
-            if (!isLoadingPrefs) {
-                val mode = when (checkedId) {
-                    R.id.rbWifiMode -> ConnectMode.WIFI_MODE
-                    R.id.rbHotspotMode -> ConnectMode.HOTSPOT_MODE
-                    else -> ConnectMode.WIFI_MODE
-                }
-                prefs.connectMode = mode
-                FileLogger.i(TAG, "连接模式切换为: $mode")
-            }
-        }
 
         switchAutoMode.setOnCheckedChangeListener { _, v ->
             if (!isLoadingPrefs) prefs.autoModeEnabled = v
@@ -297,12 +278,6 @@ class MainActivity : Activity() {
         detectAndUpdateApps()
 
         etSsid.setText(prefs.targetSsid)
-        
-        // 连接模式
-        when (prefs.connectMode) {
-            ConnectMode.WIFI_MODE -> { rbWifiMode.isChecked = true; rbHotspotMode.isChecked = false }
-            ConnectMode.HOTSPOT_MODE -> { rbWifiMode.isChecked = false; rbHotspotMode.isChecked = true }
-        }
 
         switchAutoMode.isChecked = prefs.autoModeEnabled
         etBootDelay.setText(prefs.bootDelaySeconds.toString())
@@ -315,10 +290,13 @@ class MainActivity : Activity() {
     }
 
     private fun detectAndUpdateApps() {
-        val pm = packageManager
+        val launcher = AppLauncher(this)
+        // 前缀匹配，兼容共存版（原包名后追加英文）
+        yilianInstalledPkg = launcher.findInstalledPackage(PrefsHelper.PKG_YILIAN)
+        baiduInstalledPkg  = launcher.findInstalledPackage(PrefsHelper.PKG_BAIDU)
 
-        val yilianOk = isAppInstalled(pm, PrefsHelper.PKG_YILIAN)
-        val baiduOk  = isAppInstalled(pm, PrefsHelper.PKG_BAIDU)
+        val yilianOk = yilianInstalledPkg != null
+        val baiduOk  = baiduInstalledPkg != null
 
         tvYilianInstalled.text      = if (yilianOk) "✓" else "✗"
         tvBaiduInstalled.text       = if (baiduOk)  "✓" else "✗"
@@ -331,28 +309,40 @@ class MainActivity : Activity() {
         tvNoAppWarning.visibility =
             if (!yilianOk && !baiduOk) View.VISIBLE else View.GONE
 
-        when (prefs.targetAppPkg) {
-            PrefsHelper.PKG_YILIAN -> { rbYilian.isChecked = true;  rbBaidu.isChecked = false }
-            PrefsHelper.PKG_BAIDU  -> { rbYilian.isChecked = false; rbBaidu.isChecked = true  }
+        val cur = prefs.targetAppPkg
+        when {
+            cur.startsWith(PrefsHelper.PKG_YILIAN) -> {
+                rbYilian.isChecked = true
+                rbBaidu.isChecked  = false
+                // 共存版：将保存的包名修正为实际安装的包名
+                if (yilianOk && cur != yilianInstalledPkg) {
+                    prefs.targetAppPkg   = yilianInstalledPkg!!
+                    prefs.targetAppLabel = getString(R.string.app_label_yilian)
+                }
+            }
+            cur.startsWith(PrefsHelper.PKG_BAIDU) -> {
+                rbYilian.isChecked = false
+                rbBaidu.isChecked  = true
+                if (baiduOk && cur != baiduInstalledPkg) {
+                    prefs.targetAppPkg   = baiduInstalledPkg!!
+                    prefs.targetAppLabel = getString(R.string.app_label_baidu)
+                }
+            }
             else -> {
                 when {
                     yilianOk && !baiduOk -> {
                         rbYilian.isChecked = true
-                        prefs.targetAppPkg   = PrefsHelper.PKG_YILIAN
+                        prefs.targetAppPkg   = yilianInstalledPkg!!
                         prefs.targetAppLabel = getString(R.string.app_label_yilian)
                     }
                     baiduOk && !yilianOk -> {
                         rbBaidu.isChecked = true
-                        prefs.targetAppPkg   = PrefsHelper.PKG_BAIDU
+                        prefs.targetAppPkg   = baiduInstalledPkg!!
                         prefs.targetAppLabel = getString(R.string.app_label_baidu)
                     }
                 }
             }
         }
-    }
-
-    private fun isAppInstalled(pm: PackageManager, pkg: String): Boolean {
-        return try { pm.getPackageInfo(pkg, 0); true } catch (e: Exception) { false }
     }
 
     private fun showSsidPickerDialog() {

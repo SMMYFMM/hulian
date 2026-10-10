@@ -16,17 +16,10 @@ enum class RunMode {
     AUTO      // 自动模式：开机延时触发，结束时不执行vendor命令
 }
 
-// 连接模式
-enum class ConnectMode {
-    WIFI_MODE,     // WiFi模式：车机连接手机热点
-    HOTSPOT_MODE   // 热点模式：车机开启热点，手机连接车机
-}
-
 // 状态变化事件，状态机内部流转用
 sealed class ConnectionEvent {
     object StartRequested : ConnectionEvent()       // 用户点击 / 自动延时到
-    object BtWifiReady : ConnectionEvent()          // BT+WiFi 均已开启 (WiFi模式)
-    object HotspotReady : ConnectionEvent()         // 热点已开启 (热点模式)
+    object BtWifiReady : ConnectionEvent()          // BT+WiFi 均已开启
     object HotspotConnected : ConnectionEvent()     // 目标SSID已连接
     object AppLaunched : ConnectionEvent()          // 互联App已启动
     object AppExited : ConnectionEvent()            // 互联App退出/切走

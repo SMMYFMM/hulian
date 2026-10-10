@@ -31,9 +31,6 @@ class PrefsHelper(context: Context) {
         const val KEY_BT_KILL_COMMAND = "bt_kill_command"
         const val KEY_BOOT_AUTO_START = "boot_auto_start"
 
-        // 连接模式
-        const val KEY_CONNECT_MODE = "connect_mode"
-
         // 默认值
         const val DEFAULT_TARGET_SSID = "SMMY80"
         const val DEFAULT_BOOT_DELAY = 15
@@ -41,7 +38,7 @@ class PrefsHelper(context: Context) {
         const val DEFAULT_FLOAT_WIN_SIZE = 80
         const val DEFAULT_BT_KILL_COMMAND = "service call fce-bt-misc-ctrl 2"
 
-        // 已知互联App包名
+        // 已知互联App包名前缀（兼容共存版：原包名后追加英文，如 net.easyconnxxx）
         const val PKG_YILIAN = "net.easyconn"
         const val PKG_BAIDU = "com.baidu.carlifevehicle"
     }
@@ -103,15 +100,6 @@ class PrefsHelper(context: Context) {
     var bootAutoStart: Boolean
         get() = prefs.getBoolean(KEY_BOOT_AUTO_START, true)
         set(v) = prefs.edit().putBoolean(KEY_BOOT_AUTO_START, v).apply()
-
-    // ── 连接模式 ─────────────────────────────────────
-
-    var connectMode: ConnectMode
-        get() {
-            val name = prefs.getString(KEY_CONNECT_MODE, ConnectMode.WIFI_MODE.name) ?: ConnectMode.WIFI_MODE.name
-            return try { ConnectMode.valueOf(name) } catch (e: Exception) { ConnectMode.WIFI_MODE }
-        }
-        set(v) = prefs.edit().putString(KEY_CONNECT_MODE, v.name).apply()
 
     var firstLaunchDone: Boolean
         get() = prefs.getBoolean("first_launch_done", false)
