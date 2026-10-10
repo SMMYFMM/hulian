@@ -15,6 +15,7 @@ captures/
 app/build/
 app/release/
 app/debug/
+*.apk
 
 # IDE project files
 project-*/
